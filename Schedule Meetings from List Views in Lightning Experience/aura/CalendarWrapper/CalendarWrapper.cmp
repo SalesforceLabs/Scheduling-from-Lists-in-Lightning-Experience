@@ -1,0 +1,146 @@
+<aura:component access="global" controller="EventSchedullingLtngCtrl" extends="c:Abstract">
+    <aura:attribute name="selectedRecords"         type="Object[]"     access="global"/>
+    <aura:attribute name="draftEvents"             type="Event[]"      access="global"/>
+    <aura:attribute name="eventRelatedPersonMap"   type="Map"          access="global"/>
+    <aura:attribute name="eventRelatedObjectMap"   type="Map"          access="global"/>
+    <aura:attribute name="relatedObjectName"       type="String"       access="global"/>
+    <aura:attribute name="relatedPersonName"       type="String"       access="global"/>
+    <aura:attribute name="assignedToName"          type="String"       access="global"/>
+    <aura:attribute name="currentUserName"         type="String"       access="global"/>
+    <aura:attribute name="currentIndex"            type="Integer"      access="global" default="0"/>
+    <aura:attribute name="currentDraftEvent"       type="Event"        access="global"/>
+    <aura:attribute name="relatedPersonObjApiName" type="String"        access="global" default='Contact'/>
+
+    <aura:attribute name="namespace"             type="String"       access="global"/>
+
+    <aura:attribute name="noRecordsSelected"    type="Boolean"      access="global" default="false" />
+    <aura:attribute name="canReadEvents"        type="Boolean"      access="global" default="true" />
+    <aura:attribute name="canUpdateEvents"      type="Boolean"      access="global" default="true" />
+
+    <aura:attribute name="canEditAllDay"        type="Boolean"      access="global" default="true" />
+    <aura:attribute name="canEditName"      type="Boolean"      access="global" default="true" />
+    <aura:attribute name="canEditRelatedTo"        type="Boolean"      access="global" default="true" />
+
+    <aura:attribute name="loadComplete" type="Boolean" default="false"/>
+    <aura:attribute name="disableSaveAndNew"    type="Boolean"      access="global" default="false" />
+    <aura:attribute name="disableSave" type="Boolean" default="false"/>
+   
+    <aura:attribute name="afterSaveLoadNext"    type="Boolean"      access="global" default="true" />
+    <aura:attribute name="toastSuccessTitle"    type="String"       access="global"/>
+    <aura:attribute name="toastSuccessBody"    type="String"       access="global"/>
+    <aura:attribute name="toastErrorTitle"    type="String"       access="global"/>
+    <aura:attribute name="toastErrorBody"    type="String"       access="global"/> 
+    
+    
+    <!-- Handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+	<aura:handler event="c:EvtSaveSuccess" action="{!c.handleEvtSaveSuccess}" />
+    <aura:handler event="c:EvtSaveError" action="{!c.handleEvtSaveError}" />
+    <aura:handler event="c:EvtShowToast" action="{!c.showToast}" />
+    
+    
+    <div aura:id="toastSuccessMessage" class="demo-only slds-hidden" style="height: 0rem;">
+        <div class="slds-notify_container slds-is-relative">
+            <div id="toastRole" class="slds-notify slds-notify_toast slds-theme_success" role="alert">
+                <span class="slds-assistive-text">success</span>
+                <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                    
+                </span>
+                <div class="slds-notify__content">
+                    <h2 aura:id="toastSuccessTitle" id="toastSuccessTitle" class="slds-text-heading_small ">{!v.toastSuccessTitle}</h2>
+                    <p aura:id="toastSuccessBody" id="toastSuccessBody">{!v.toastSuccessBody}</p>
+                </div>
+                <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" onclick="{!c.closeToastSuccess}">
+                    <lightning:icon iconName="utility:close" size="small" class="icn"/>
+                    <span class="slds-assistive-text">Close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div aura:id="toastErrorMessage" class="demo-only slds-hidden" style="height: 0rem;">
+        <div class="slds-notify_container slds-is-relative">
+            <div id="toastRole" class="slds-notify slds-notify_toast slds-theme_error" role="alert">
+                <span class="slds-assistive-text">success</span>
+                <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top">
+                    <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" onclick="{!c.closeToastError}">
+                        <lightning:icon iconName="utility:close" size="small" class="icn"/>
+                    </button>
+                </span>
+                <div class="slds-notify__content">
+                    <h2 aura:id="toastErrorTitle" id="toastErrorTitle" class="slds-text-heading_small ">{!v.toastErrorTitle}</h2>
+                    <p  aura:id="toastErrorBody" id="toastErrorBody">{!v.toastErrorBody}</p>
+                </div>
+                <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" title="Close" onclick="{!c.closeToastError}">
+                    <lightning:icon iconName="utility:close" size="small" class="icn"/>
+                    <span class="slds-assistive-text">Close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+	<div  aura:id="spinnerContainer" class="fix-slds-spinner_container slds-spinner_container">
+        <div role="status" class="slds-spinner slds-spinner_medium">
+            <span class="slds-assistive-text">Loading</span>
+            <div class="slds-spinner__dot-a"></div>
+            <div class="slds-spinner__dot-b"></div>
+        </div>
+    </div>
+
+    <aura:renderIf isTrue="{!v.noRecordsSelected}">
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+                <span class="slds-assistive-text">warning</span>
+                <div class="slds-text-heading_small">
+                    <p class="slds-text-heading_medium">No records selected</p>
+                    You need to select at least one record from the list view. <a href="#" onclick="{!c.doCancel}">Go back</a>
+                </div>
+            </div>
+    </aura:renderIf>
+
+    <aura:renderIf isTrue="{!!v.noRecordsSelected}">
+    
+        <article class="slds-card">      
+                <div class="slds-card__body slds-m-bottom_none slds-border_bottom slds-border_top">
+                    <div class="slds slds-grid">
+                        <div class="slds-col slds-size_2-of-3 slds-p-around_xxx-small slds-border_right ">
+                            <aura:if isTrue="{!v.loadComplete}">
+                                <c:Calendar canReadEvents="{!v.canReadEvents}" canUpdateEvents="{!v.canUpdateEvents}" canSelectAllDay="{!v.canEditAllDay}"/>
+                            </aura:if>
+                        </div>               
+                        <div class="slds-col slds-size_1-of-3">
+                            <aura:renderIf isTrue="{!v.canUpdateEvents}">
+                                <c:FormWrapper aura:id="event-form" relatedObjectName="{!v.relatedObjectName}" relatedPersonName="{!v.relatedPersonName}"
+                                               relatedPersonObjApiName="{!v.relatedPersonObjApiName}"
+                                               assignedToName="{!v.assignedToName}" newEvent="{!v.currentDraftEvent}" canEditAllDay="{!v.canEditAllDay}" 
+                                               canEditName="{!v.canEditName}" canEditRelatedTo="{!v.canEditRelatedTo}"/>
+
+                            </aura:renderIf>
+                            <aura:renderIf isTrue="{!!v.canUpdateEvents}">
+                                    <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+                                        <span class="slds-assistive-text">error</span>
+                                        <div class="slds-text-heading_small">
+                                            <p class="slds-text-heading_medium">Looks like there's a problem.</p>
+                                            You don't have the necessary privileges to create this record. See your administrator for help. <a href="#" onclick="{!c.doCancel}">Go back</a>
+                                        </div>
+                                    </div>
+                            </aura:renderIf>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-card__footer slds-theme_shade slds-m-top_none slds-p-around_x-small">
+                    
+                    <div class=" slds-text-align_right" role="group">
+                        <lightning:button  onclick="{!c.doCancel}">Cancel</lightning:button>
+                        <aura:renderIf isTrue="{!v.canUpdateEvents}">
+                            <lightning:button  onclick="{!c.doSave}" disabled="{!v.disableSave}">Save</lightning:button>
+                            <aura:renderIf isTrue="{!!v.disableSaveAndNew}">
+                                <lightning:button class="slds-button_brand" onclick="{!c.doSaveAndNew}" disabled="{!v.disableSave}">Save and Next</lightning:button>
+                            </aura:renderIf>
+                        </aura:renderIf>
+                    </div>
+                </footer>
+            </article>
+    </aura:renderIf>
+        
+    
+    
+</aura:component>

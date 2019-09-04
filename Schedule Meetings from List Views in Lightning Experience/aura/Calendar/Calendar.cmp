@@ -1,0 +1,61 @@
+<aura:component implements="force:hasRecordId,force:hasSObjectName" controller="EventSchedullingLtngCtrl"  extends="c:Abstract">
+	
+	 <ltng:require styles="{!$Resource.fullCalendar_390_css}"
+	 scripts="{!join(',', 
+	 $Resource.fullCalendar_390_jquery_js,
+	 $Resource.fullCalendar_390_moment_js,
+	 $Resource.fullCalendar_390_js,
+	 $Resource.moment_timezone )}"
+	 afterScriptsLoaded="{!c.doInit}"/>
+
+	<aura:attribute name="namespace"    type="String"  access="global"/>
+	<aura:attribute name="recordId" 	type="String" access="global" />
+	<aura:attribute name="sObjectName" 	type="String" access="global" />
+	<aura:attribute name="user_id" 		type="String" />
+	<aura:attribute name="currentEventId" type="String" />
+	<aura:attribute name="currentWeek" 	type="String" />
+	<aura:attribute name="todayEnabled"	type="Boolean" default="true"/>
+	<aura:attribute name="canReadEvents" type="Boolean" required="true" />
+	<aura:attribute name="canUpdateEvents" type="Boolean" required="true" />
+	<aura:attribute name="canSelectAllDay" type="Boolean" access="global" default="true" />
+	
+
+    <!-- Handlers -->
+    <aura:handler event="c:EvtResize" action="{!c.handleEvtResize}" />
+    <aura:handler event="c:EvtReloadEvents" action="{!c.handleEvtReloadEvents}" />
+    <!-- Events -->
+	  <aura:registerEvent name="eventSchedule" type="c:EvtSchedule"/>
+	  <aura:registerEvent name="EvtReSchedule" type="c:EvtReSchedule"/>
+	  
+
+		<div class="slds-theme_shade slds-p-around_x-small">
+			<header class="slds-media slds-media_center slds-has-flexi-truncate">
+				<div class="slds-media__figure">
+					<lightning:icon iconName="standard:event" size="medium" alternativeText="Events" />
+				</div>
+				<div class="slds-media__body">
+					<div class="slds-text-align_left" id="header-text-box">
+						<p>Calendar</p>
+						<h1 class="slds-page-header__title">{!v.currentWeek}</h1>
+					</div>
+				</div>
+				<div class="slds-button-group" role="group">
+					<lightning:buttonIcon iconName="utility:chevronleft" onclick="{!c.clickPreviousArrow}" />
+					<lightning:buttonIcon iconName="utility:chevronright" onclick="{!c.clickNextArrow}" />
+				</div>
+				<lightning:button class="slds-m-left_small slds-button slds-button_neutral" 
+								onclick="{!c.clickThisWeek}" 
+								disabled="{!v.todayEnabled}">This Week</lightning:button>
+			</header>
+		</div>
+	
+	<div id='container'>
+		<div id="externalTitle"></div>
+		<div id='calendar' style="margin-top:5px;"></div>
+	</div>
+
+	<div id="modalView" class="modalWrap slds-hide slds-size_1-of-6">
+		<c:EventPreview recordId="{!v.currentEventId}"/>
+	</div>
+	
+</aura:component>

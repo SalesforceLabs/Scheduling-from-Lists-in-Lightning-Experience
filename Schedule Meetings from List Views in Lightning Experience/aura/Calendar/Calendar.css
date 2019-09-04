@@ -1,0 +1,120 @@
+.THIS #header-text-box h1 {
+    font-weight: bold;
+}
+
+.THIS th.fc-day-header{
+    text-transform: uppercase;
+    font-weight: normal;
+}
+
+.THIS .fc-unthemed td.fc-today{
+    background: #fafafb;
+}
+
+.THIS .fc-event{
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.16);  
+}
+
+.THIS .fc-content .fc-time{
+    font-weight: 700!important;
+    font-size: inherit;
+}
+
+.THIS .fc-event-container a.fc-event{
+    text-decoration: none;
+}
+
+.THIS .fc-event-container .fc-event{
+    border-color: transparent;
+    color: rgb(0, 57, 107);
+    text-decoration: none;
+}
+
+.THIS .fc-event-container .fc-event.dummyEvent{
+    background-color: #1E90FF;
+    border-color: rgb(204, 204, 204);
+    color: black;
+}
+
+.THIS a.pastEvent{
+    background: rgb(235, 247, 255);
+    /*opacity: .7; We need to avoid events overlapping */
+    z-index: 1;
+}
+
+.THIS a.futureEvent{
+    background: #CFEBFE;
+}
+
+.THIS a.endsNextWeek{
+    border-top: 13.5px solid #fff;
+    border-bottom: 13.5px solid #fff;
+}
+
+.THIS.modalWrap{
+    position: absolute;
+    z-index: 999;
+	background: white;
+	top : 0px;
+    left: 0px;
+}
+
+/* */
+.THIS  .fc-event-hover {
+    position: relative !important;
+    height: 17px;
+  }
+  .THIS   .fc-event-hover .fc-content {
+    position: absolute !important;
+    top: -1px;
+    left: 0;
+    z-index: 99999;
+    width: auto;
+    overflow: visible !important;
+    background-color: #3a87ad;
+    padding: 1px;
+    border-radius: 2px;
+  }
+  .THIS .fc-content-skeleton tr td:last-child .fc-event-hover .fc-content {
+    left: auto;
+    right: 0;
+  }
+
+.THIS .dummyEvent .fc-title:hover {
+    text-decoration: none;
+}
+
+.THIS .fc-title:hover {
+    text-decoration: underline;
+}
+
+.THIS .fc-h-event {
+    min-height: 20px;
+}
+
+.THIS .fc-event:hover {
+    width: 105%;
+    z-index: 9999 !important;
+}
+
+.THIS .fc-event.detail-on-hover:hover {
+    overflow: unset;
+    min-height: 38px;
+    left: unset !important;
+}
+
+.THIS .early-event:hover {
+    bottom: unset !important;
+}
+
+.THIS .fc-v-event.late-event:hover {
+    top: unset !important;
+}
+
+.THIS .fc-h-event:hover .fc-title {
+    white-space: normal;
+}
+
+.THIS .fc-event-container:hover {
+    z-index: 9999 !important;
+}

@@ -1,0 +1,7 @@
+<aura:component access="GLOBAL" extensible="true" abstract="true">{!v.body}
+    
+    <!-- Events -->
+    <aura:registerEvent name="ShowToast" type="c:EvtShowToast" /> 
+    
+    
+</aura:component>

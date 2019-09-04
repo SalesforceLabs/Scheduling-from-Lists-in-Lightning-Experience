@@ -1,0 +1,7 @@
+<aura:event type="APPLICATION" description="Event template" access="GLOBAL" >
+	<aura:attribute name="startDate" type="String"/>
+	<aura:attribute name="startTime" type="String"/>
+	<aura:attribute name="endDate" type="String"/>
+	<aura:attribute name="endTime" type="String"/>
+	<aura:attribute name="isAllDay" type="Boolean"/>
+</aura:event>

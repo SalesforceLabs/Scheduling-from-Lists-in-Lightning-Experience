@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Custom Notifications - Process Builders %26 Custom Notification Object</fullName>
+    <types>
+        <members>Custom_notification</members>
+        <name>CustomNotificationType</name>
+    </types>
+    <types>
+        <members>Community_Case_Post_Case_Owner_Notifier</members>
+        <members>Inbound_Email_Case_Owner_Notifier</members>
+        <name>Flow</name>
+    </types>
+    <version>46.0</version>
+</Package>

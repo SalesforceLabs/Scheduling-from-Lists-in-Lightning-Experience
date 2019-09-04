@@ -1,0 +1,101 @@
+<aura:component controller="EventSchedullingLtngCtrl" extends="c:Abstract" access="GLOBAL">
+
+	<ltng:require scripts="{!$Resource.fullCalendar_390_moment_js}"/>
+	<aura:attribute name="newEvent" type="Event" default="{'sObjectType':'Event'}" description="Event attribute to place Form values"/>	
+	<aura:attribute name="startDate" type="String" description="Date  for event start" />
+	<aura:attribute name="startTime" type="String" description="Time  for event start" />
+	<aura:attribute name="endDate" type="String" description="Date for event end" />
+	<aura:attribute name="endTime" type="String" description="Time for event end" />
+	<aura:attribute name="start" type="String" description="TEST" />
+	<aura:attribute name="end" type="String" description="TEST" />
+	<aura:attribute name="user" type="String" description="User Name" />
+    <aura:attribute name="relatedObjectName"     type="String"/>
+    <aura:attribute name="relatedPersonName"     type="String" default="Contacts"/>
+    <aura:attribute name="relatedPersonObjApiName" type="String" default="Contact"/>
+	<aura:attribute name="relatedToObjApiName" type="String" default="Account"/>
+	<aura:attribute name="assignedToName"       type="String"/>
+
+	<aura:attribute name="canEditAllDay" type="Boolean" access="global" default="true" />
+    <aura:attribute name="canEditName" type="Boolean" access="global" default="true" />
+    <aura:attribute name="canEditRelatedTo" type="Boolean" access="global" default="true" />
+
+	
+    <aura:attribute name="value" type="String" />
+
+	<aura:method name="saveEvent">
+		<aura:attribute name="callback" type="Function"/>
+	</aura:method>
+
+
+	<!-- Handlers -->
+	<aura:handler event="c:EvtSchedule" action="{!c.handleScheduleEvt}" />
+	<aura:handler name="change" value="{!v.relatedPersonObjApiName}" action="{!c.handleRelatedPersonNameChange}"/>
+
+    <!-- Events -->
+	<aura:registerEvent name="navigateBackVF" type="c:EvtNavigateBack" /> 
+    <aura:registerEvent name="EvtResize" type="c:EvtResize" /> 
+	
+	<!--FORM Implementation-->
+	<div class="slds-form slds-form_stacked slds-p-around_medium">
+		<header class="slds-card__header slds-border_bottom slds-p-bottom_small">
+			<div class="slds-media__body slds-text-align_center">
+				<h1 class="slds-page-header__title slds-truncate slds-align-middle">New Event</h1>
+			</div>
+		</header>
+		<div class="slds-form-element">
+			<lightning:input aura:id="eventform" type="text" name="subject-field" required="true" label="Subject" value="{!v.newEvent.Subject}" maxlength="255" />
+		</div>
+		<div class="slds-form-element">
+			<fieldset>
+				<legend>Start</legend>
+				<lightning:input aura:id="eventform" type="date" name="start-date-field" required="true" value="{!v.startDate}" label="Date" onchange="{!c.changeStartOrEnd}" />
+				<aura:if isTrue="{! !v.newEvent.IsAllDayEvent}">
+					<lightning:input aura:id="eventform" type="time" name="start-time-field" required="true" value="{!v.startTime}" label="Time" onchange="{!c.changeStartOrEnd}"  />
+				</aura:if>
+			</fieldset>
+		</div>
+		<div class="slds-form-element">
+			<fieldset>
+				<legend>End</legend>
+				<lightning:input aura:id="eventform" type="date" name="end-date-field" required="true" value="{!v.endDate}" label="Date"  onchange="{!c.changeStartOrEnd}"  />
+				<aura:if isTrue="{! !v.newEvent.IsAllDayEvent}">
+					<lightning:input aura:id="eventform" type="time" name="end-time-field" required="true" value="{!v.endTime}" label="Time"  onchange="{!c.changeStartOrEnd}"  />
+				</aura:if>
+			</fieldset>
+		</div>
+		<aura:if isTrue="{!v.canEditAllDay}">
+		    <div class="slds-form-element">
+			    <lightning:input aura:id="eventform" type="checkbox" name="all-day-event-field" label="All-Day Event" checked="{!v.newEvent.IsAllDayEvent}" onchange="{!c.changeStartOrEnd}"/>
+		    </div>
+		</aura:if>
+		<aura:if isTrue="{!v.canEditName}">
+			<div class="slds-form-element">
+				<c:Lookup aura:id="lookupName" fieldLabel="Name" withObjectSelector="true" objectAPIName="{!v.relatedPersonObjApiName}" chosenRecordId="{!v.newEvent.WhoId}" chosenRecordLabel="{!v.relatedPersonName}" placeholder="Search Contacts..."
+					  combo_options_map="{
+							Contact: {'label': 'Contacts', 'value': 'Contact', 'icon': 'standard:contact', 'fieldLabels': ['Name', 'Account.Name'] },
+							Lead: {'label': 'Leads', 'value': 'Lead', 'icon': 'standard:lead', 'fieldLabels': ['Name', 'Company'] }   
+						}"/>
+			</div>
+		</aura:if> 
+		<aura:if isTrue="{!v.canEditRelatedTo}">
+			<div class="slds-form-element">
+				<c:Lookup aura:id="lookupRelatedTo" fieldLabel="Related To" withObjectSelector="true" objectAPIName="{!v.relatedToObjApiName}" iconType="standard:account" chosenRecordId="{!v.newEvent.WhatId}" chosenRecordLabel="{!v.relatedObjectName}" placeholder="Search Accounts..." 
+					combo_options_map="{ 
+						  Account: {'label': 'Accounts', 'value': 'Account', 'icon': 'standard:account', 'fieldLabels': ['Name']},
+						  AssetRelationship: {'label': 'Asset Relationships', 'value': 'AssetRelationship', 'icon': 'standard:asset_relationship', 'fieldLabels': ['AssetRelationshipNumber', 'Asset.Name']},
+						  Asset: {'label': 'Assets', 'value': 'Asset', 'icon': 'standard:product', 'class': 'icon-standard-asset', 'fieldLabels': ['Name', 'SerialNumber']},
+						  Campaign: {'label': 'Campaigns', 'value': 'Campaign', 'icon': 'standard:campaign', 'fieldLabels': ['Name']},
+						  Case: {'label': 'Cases', 'value': 'Case', 'icon': 'standard:case', 'fieldLabels': ['CaseNumber', 'Subject']},
+						  Contract: {'label': 'Contracts', 'value': 'Contract', 'icon': 'standard:contract', 'fieldLabels': ['ContractNumber', 'Account.Name']},
+						  Opportunity: {'label': 'Opportunities', 'value': 'Opportunity', 'icon': 'standard:opportunity', 'fieldLabels': ['Name', 'Account.Name']},
+						  Order: {'label': 'Orders', 'value': 'Order', 'icon': 'standard:orders', 'fieldLabels': ['OrderNumber', 'Account.Name']},
+						  Product2: {'label': 'Products', 'value': 'Product2', 'icon': 'standard:product', 'fieldLabels': ['Name', 'ProductCode']},
+						  Solution: {'label': 'Solutions', 'value': 'Solution', 'icon': 'standard:solution', 'fieldLabels': ['SolutionName', 'SolutionNumber']},
+					  }" disabled="{!v.relatedPersonObjApiName == 'Lead'}"/>
+			</div>
+		</aura:if>
+		<div class="slds-form-element">
+			<c:Lookup aura:id="lookupAssignedTo" fieldLabel="Assigned To" objectAPIName="User" subHeadingFieldsAPI="['Name']" iconType="standard:user" chosenRecordId="{!v.newEvent.OwnerId}" chosenRecordLabel="{!v.assignedToName}" placeholder="Search People..."  required="true"/>
+		</div>
+	</div>	
+</aura:component>

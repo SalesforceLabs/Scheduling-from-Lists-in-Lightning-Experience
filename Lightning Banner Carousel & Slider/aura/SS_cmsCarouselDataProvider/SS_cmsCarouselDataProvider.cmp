@@ -1,0 +1,4 @@
+<aura:component extends="c:SS_uiDataProvider" controller="SS_CarouselController" access="global">
+	<aura:attribute name="name" type="String" description="Carousel Name" access="global"/>
+    <aura:handler name="provide" action="{!c.provide}"/>
+</aura:component>

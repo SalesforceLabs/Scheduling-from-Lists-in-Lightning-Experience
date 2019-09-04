@@ -1,0 +1,19 @@
+.THIS {
+    height: 90vh;
+    overflow: auto;
+}
+
+.THIS .disabled {
+    background-color: rgb(233, 234, 236);
+    border-color: rgb(196, 198, 202);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.THIS legend {
+    color: rgb(107, 109, 112);
+}
+
+.THIS h1 {
+    color: rgb(107, 109, 112);
+}

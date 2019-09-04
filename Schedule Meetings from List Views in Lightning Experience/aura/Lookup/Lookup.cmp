@@ -1,0 +1,144 @@
+<!--
+ - Created by Jai Chaturvedi.
+ - Lightning component for lookup/auto-complete fields.
+ - Can be used with other components directly.
+ - Modified by Emiliano Torrano
+ -->
+
+<aura:component description="Lookup. Lightning component for lookup fields.
+                             Can be used standalone or with other lightning component"
+                controller="LookupController">
+
+    <aura:attribute name="withObjectSelector"
+                    type="Boolean"
+                    default="false"
+                    description="Enable/Disable Object combobox selector"/>
+
+    <aura:attribute name="objectAPIName"
+                    type="String"
+                    required="true"
+                    default="Contact"
+                    description="Object API name used for searching records"/>
+
+    <aura:attribute name="placeholder"
+                    type="String"
+                    default="Search..."
+                    description="Placeholder text for input search filed"/>
+
+    <aura:attribute name="fieldLabel"
+                    type="String"
+                    required="true"
+                    description="input search field Label"/>
+
+    <aura:attribute name="filter"
+                    type="String[]"
+                    default="[]"
+                    description="Array of filter for SOSL query.
+                                 All the filters should be given in this field separated by comma(,)
+                                 Example: AccountId='001200000047KEdAAM' "/>
+
+    <aura:attribute name="chosenRecordId"
+                    type="String"
+                    description="Used to store the selected record id.
+                                 While calling this component from other component,
+                                 set this attribute to the lookup field API name"/>
+
+    <aura:attribute name="chosenRecordLabel"
+                    type="String"
+                    description="This is used to show the selected record Name in search input"/>
+
+    <aura:attribute name="subHeadingFieldsAPI"
+                    type="String[]"
+                    description="Field API for the fields to be shown under the record Name.
+                                 Must be comma separated. Example: Email,Phone"/>
+
+    <aura:attribute name="matchingRecords"
+                    type="Object[]"
+                    access="private"
+                    description="List of records returned from server side call."/>
+
+    <aura:attribute name="combo_options" type="List" default="[
+                                                              {'label': 'Accounts', 'value': 'Account', 'icon': 'standard:account'},
+                                                              {'label': 'Contacts', 'value': 'Contact', 'icon': 'standard:contact'},
+                                                              {'label': 'Leads', 'value': 'Lead', 'icon': 'standard:lead'},
+                                                              ]"/>
+    <aura:attribute name="combo_options_map" type="Map" default="{
+                                                             Account: {'label': 'Accounts', 'value': 'Account', 'icon': 'standard:account'},
+                                                             Contact: {'label': 'Contacts', 'value': 'Contact', 'icon': 'standard:contact'},
+                                                             Lead: {'label': 'Leads', 'value': 'Lead', 'icon': 'standard:lead'}
+                                                             }" />
+    <aura:attribute name="iconType" type="String" description="Icon type" default="standard:contact"/>
+
+    <aura:attribute name="iconClass" type="String" description="Icon class"/>
+
+    <aura:attribute name="required"
+                    type="Boolean"
+                    default="false"
+                    description="Indicate if the search input is required."/>
+
+    <aura:attribute name="disabled"
+                    type="Boolean"
+                    default="false"
+                    description="Set lookup elements disabled."/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <aura:handler name="lookupChoose"
+                  event="c:LookupChooseEvent"
+                  action="{!c.handleLookupChooseEvent}"
+                  description="Event handler to get the selected record Id and Name from LookupItem component"/>
+
+    <aura:handler name="change" value="{!v.objectAPIName}" action="{!c.handleObjectAPINameChange}"/>
+
+    <aura:method name="validateInput"></aura:method>
+    <div class="slds-form-element">
+        <label class="slds-form-element__label" for="combobox-id-40">{!v.fieldLabel}</label>
+        <div class="slds-form-element__control">
+            <div class="slds-combobox-group">
+                <aura:if isTrue="{!v.withObjectSelector}">
+                    <div class="slds-combobox-addon_start" aura:id="objectSelector">
+                        <div aura:id="combo-dropdown" class="slds-dropdown-trigger slds-dropdown-trigger_click cLookup" aria-controls="primary-combobox-id-9" aria-expanded="true" aria-haspopup="listbox" role="combobox" disabled="{!v.disabled}">
+                            <button aura:id="btn-combobox" class="{!v.disabled ? 'slds-button slds-button_icon slds-button_icon-more disabled' : 'slds-button slds-button_icon slds-button_icon-more'}" aria-expanded="false" aria-haspopup="true" onclick="{!c.handleComboboxClick}" onblur="{!c.handleComboboxOnBlur}">                                
+                                <span class="slds-icon_container slds-icon-standard-lead slds-input__icon slds-input__icon_left" title="{!v.objectAPIName}">
+                                    <lightning:icon size="small" iconName="{!v.iconType}" class="{!v.iconClass}"/>
+                                    <span class="slds-assistive-text">{!v.objectAPIName}</span>
+                                </span>
+                                <span class="slds-icon_container slds-icon-utility-down slds-input__icon slds-input__icon_right slds-button-space-left">
+                                    <lightning:icon size="xx-small" iconName="utility:down"/>
+                                </span>
+                            </button>
+                            <div id="listbox-unique-id" class="slds-dropdown slds-dropdown_left" role="listbox">
+                                <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                    <!-- LookupItem component for creating record list -->
+                                    <aura:iteration var="menuItem" items="{!v.combo_options}">
+                                        <c:LookupItem aura:id="combo-item-id" record="{!menuItem}" iconCategoryName="{!menuItem.icon}" iconClass="{!menuItem.class}"/>
+                                    </aura:iteration> 
+                                </ul> 
+                            </div>
+                        </div>
+                    </div>
+                </aura:if>
+                <div  class="slds-combobox_container slds-combobox-addon_end">
+                    <div aura:id="lookupdiv" class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-combobox-lookup"
+                            aria-expanded="false" aria-haspopup="listbox" role="combobox">
+                        <div aura:id="input-search" id="input-search" class="slds-combobox__form-element">
+                            <!-- using input type "search" to place the search icon input field-->
+                            <lightning:input type="search" aura:id="searchinput" value="{!v.chosenRecordLabel}" label="{!v.fieldLabel}"
+                                            variant="label-hidden" onchange="{!c.searchRecords}" isLoading="false" placeholder="{!v.placeholder}"
+                                            onfocus="{!c.searchRecords}" required="{!v.required}" onblur="{!c.hideList}" disabled="{!v.disabled}"/>
+                        </div>
+                        <div id="listbox-unique-id" role="listbox">
+                            <ul class="slds-listbox slds-listbox_vertical slds-dropdown slds-dropdown_fluid"
+                                role="presentation">
+                                <!-- LookupItem component for creating record list -->
+                                <aura:iteration var="rec" items="{!v.matchingRecords}">
+                                    <c:LookupItem record="{!rec}" subHeadingFieldsAPI="{!v.subHeadingFieldsAPI}" iconCategoryName="{!v.iconType}" iconClass="{!v.iconClass}"/>
+                                </aura:iteration>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</aura:component>

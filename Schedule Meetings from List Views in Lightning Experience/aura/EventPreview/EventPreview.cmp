@@ -1,0 +1,48 @@
+<aura:component  access="global" controller="EventSchedullingLtngCtrl" extends="c:Abstract">
+	<aura:attribute name="recordId" type="String" description="Id of event to display" />
+	<aura:attribute name="eventRecord" type="Object" description="Object of event to display" />
+	
+    <!-- Handlers -->
+	<aura:handler name="change" value="{!v.recordId}" action="{!c.handleEventIdUpdate}"/>
+
+
+
+	<article class="slds-tile slds-box slds-box_xx-small slds-theme_default">
+		<div class="slds-tile__title  slds-grid slds-m-around-small">
+			<div class="slds-col slds-size_2-of-12">
+					<lightning:icon iconName="standard:event" size="small"/>
+			</div>
+			<div class="slds-col slds-size_8-of-12 slds-text-heading_small">
+				<a href="javascript:void(0);" onclick="{!c.navigateToEvent}" >{! v.eventRecord.Subject }</a>
+			</div>
+			<div class="slds-col slds-size_2-of-12 align-right">
+				<lightning:buttonIcon iconName="utility:close" variant="bare" onclick="{! c.handleClose }" alternativeText="Settings" />
+			</div>
+		</div>
+		<div class="slds-tile__detail slds-text-body_small slds-m-top_small">
+		
+			<p class="slds-p-horizontal_small">
+				<dl class="slds-list_horizontal slds-wrap">
+					<dt class="slds-item_label slds-text-color_weak slds-truncate" title="Start time">Start:</dt>
+					<dd class="slds-item_detail slds-truncate" title="Start time">
+						<ui:outputDate value="{!v.eventRecord.StartDateTime}" format="M/d/yyyy hh:mm a" />
+					</dd>
+					<dt class="slds-item_label slds-text-color_weak slds-truncate" title="End time">End:</dt>
+					<dd class="slds-item_detail slds-truncate" title="End time">
+						<ui:outputDate value="{!v.eventRecord.EndDateTime}" format="M/d/yyyy hh:mm a" />
+					</dd>
+				</dl>
+			</p>
+			
+			<p class="slds-p-horizontal_small  slds-p-top_x-small">
+				<a href="javascript:void(0);" onclick="{!c.navigateToEvent}" >More details</a>
+			</p>
+			
+		</div>
+	</article>
+
+
+	
+
+
+</aura:component>

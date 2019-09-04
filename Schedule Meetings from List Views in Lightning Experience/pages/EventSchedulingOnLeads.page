@@ -1,0 +1,45 @@
+<!-- 
+  @author Altimetrik
+  @description
+ 	started on 06/05/2018
+ 	Page decription
+ -->
+<apex:page standardController="Lead"
+    recordSetVar="leads"
+    extensions="EventSchedullingListCtrl"
+    showHeader="false">
+
+    <apex:includeLightning />
+   <apex:slds />
+
+    <div id="lightning" />
+    <script>
+      var selectedRecords = JSON.parse("{!JSENCODE(SelectedRecords)}");
+    
+      $Lightning.use("{!JSENCODE(currentPrefix)}:EasyEventSchedulingApp", function() {
+      $Lightning.createComponent("{!JSENCODE(currentPrefix)}:CalendarWrapper",
+        {
+        selectedRecords : selectedRecords
+        },
+        "lightning",
+        function(cmp) {
+            $A.eventService.addHandler({
+                event: '{!JSENCODE(currentPrefix)}:EvtNavigateBack',
+                handler: function(event) {
+                    window.history.back();
+                }
+            });
+            $A.eventService.addHandler({
+                event: 'force:navigateToSObject',
+                handler: function(event) {
+                    var recordId = event.getParams().recordId;
+                    window.parent.location = '/' + recordId;
+                    
+                }
+            });
+        }
+      );
+      });
+
+    </script>
+</apex:page>
